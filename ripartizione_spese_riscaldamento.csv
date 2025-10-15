@@ -1,0 +1,14 @@
+Descrizione,Valore,Note
+COSTO TOTALE RISCALDAMENTO (€),,Inserire l'importo totale della bolletta gas/riscaldamento
+,,
+PERCENTUALE 1 (%),,Inserire la prima percentuale di ripartizione (es. 60 per 60%)
+IMPORTO 1 (€),,Formula: =Costo Totale * Percentuale 1 / 100
+,,
+PERCENTUALE 2 (%),,Inserire la seconda percentuale di ripartizione (es. 40 per 40%)
+IMPORTO 2 (€),,Formula: =Costo Totale * Percentuale 2 / 100
+,,
+STIMA COSTO ACQUA CALDA SANITARIA,,
+Consumo Totale Gas (m³),,Inserire il consumo totale di gas in metri cubi
+Percentuale Stima Acqua Calda (%),,Inserire la percentuale stimata per produzione acqua calda (tipicamente 20-30%)
+Costo Unitario Gas (€/m³),,Inserire il costo unitario del gas
+COSTO ACQUA CALDA STIMATO (€),,Formula: =Consumo Gas * (Percentuale ACS / 100) * Costo Unitario
