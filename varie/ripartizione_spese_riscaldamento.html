@@ -3,113 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ripartizione Spese Riscaldamento</title>
+    <title>Calcolatore di Ripartizione Spese Riscaldamento</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            padding: 20px;
-            background-color: #f4f4f4;
         }
-        h1, h2 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            margin-bottom: 20px;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: right;
+        label {
+            display: block;
+            margin: 10px 0 5px;
         }
         input[type="number"] {
             width: 100%;
             padding: 8px;
-            box-sizing: border-box;
+            margin-bottom: 10px;
         }
-        .section {
-            background: #fff;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+        .summary {
+            margin-top: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+    <h1>Calcolatore di Ripartizione Spese Riscaldamento</h1>
 
-    <div class="section">
-        <h1>Ripartizione Spese Riscaldamento</h1>
-        <table>
-            <tr>
-                <th>Voce</th>
-                <th>Importo (€)</th>
-                <th>Percentuale (%)</th>
-                <th>Calcolo (€)</th>
-            </tr>
-            <tr>
-                <td>Spesa Totale Riscaldamento</td>
-                <td><input type="number" id="totalCost" placeholder="0" oninput="calculateHeatingCost()"></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>Quota 1</td>
-                <td></td>
-                <td><input type="number" id="percentage1" placeholder="0" oninput="calculateHeatingCost()"></td>
-                <td><span id="allocation1">0</span> €</td>
-            </tr>
-            <tr>
-                <td>Quota 2</td>
-                <td></td>
-                <td><input type="number" id="percentage2" placeholder="0" oninput="calculateHeatingCost()"></td>
-                <td><span id="allocation2">0</span> €</td>
-            </tr>
-        </table>
-    </div>
+    <label for="totalBill">Importo totale della bolletta (in euro):</label>
+    <input type="number" id="totalBill" oninput="calculate()" placeholder="€">
 
-    <div class="section">
-        <h2>Stima Costo Acqua Calda Sanitaria</h2>
-        <label for="gasConsumption">Consumo Totale Gas (m³):</label>
-        <input type="number" id="gasConsumption" placeholder="0" oninput="calculateWaterCost()">
-        
-        <label for="waterPercentage">Percentuale per Acqua Calda (%):</label>
-        <input type="number" id="waterPercentage" placeholder="0" oninput="calculateWaterCost()">
-        
-        <label for="unitCost">Costo Unitario (€/m³):</label>
-        <input type="number" id="unitCost" placeholder="0" oninput="calculateWaterCost()">
-        
-        <h3>Costo Acqua Calda: <span id="waterCost">0</span> €</h3>
+    <label for="acsCubicMeters">Metri cubi di acqua calda sanitaria (ACS):</label>
+    <input type="number" id="acsCubicMeters" oninput="calculate()" placeholder="m³">
+
+    <label for="heatingPercentage1">Percentuale 1 per ripartizione spese riscaldamento:</label>
+    <input type="number" id="heatingPercentage1" oninput="calculate()" placeholder="%">
+
+    <label for="heatingPercentage2">Percentuale 2 per ripartizione spese riscaldamento:</label>
+    <input type="number" id="heatingPercentage2" oninput="calculate()" placeholder="%">
+
+    <label for="acsPercentage1">Percentuale 1 per ripartizione spese ACS:</label>
+    <input type="number" id="acsPercentage1" oninput="calculate()" placeholder="%">
+
+    <label for="acsPercentage2">Percentuale 2 per ripartizione spese ACS:</label>
+    <input type="number" id="acsPercentage2" oninput="calculate()" placeholder="%">
+
+    <div class="summary">
+        <p id="housingUnit1Cost">Costo per Unità Abitativa 1: €0.00</p>
+        <p id="housingUnit2Cost">Costo per Unità Abitativa 2: €0.00</p>
     </div>
 
     <script>
-        function calculateHeatingCost() {
-            const totalCost = parseFloat(document.getElementById('totalCost').value) || 0;
-            const percentage1 = parseFloat(document.getElementById('percentage1').value) || 0;
-            const percentage2 = parseFloat(document.getElementById('percentage2').value) || 0;
+        function calculate() {
+            const totalBill = parseFloat(document.getElementById('totalBill').value) || 0;
+            const acsCubicMeters = parseFloat(document.getElementById('acsCubicMeters').value) || 0;
+            const heatingPercentage1 = parseFloat(document.getElementById('heatingPercentage1').value) || 0;
+            const heatingPercentage2 = parseFloat(document.getElementById('heatingPercentage2').value) || 0;
+            const acsPercentage1 = parseFloat(document.getElementById('acsPercentage1').value) || 0;
+            const acsPercentage2 = parseFloat(document.getElementById('acsPercentage2').value) || 0;
 
-            const totalPercentage = percentage1 + percentage2;
-            if (totalPercentage > 100) {
-                alert("La somma delle percentuali non può superare il 100%");
-                return;
-            }
+            const heatingCost1 = (totalBill * (heatingPercentage1 / 100));
+            const heatingCost2 = (totalBill * (heatingPercentage2 / 100));
+            const acsCost1 = (totalBill * (acsPercentage1 / 100));
+            const acsCost2 = (totalBill * (acsPercentage2 / 100));
 
-            const allocation1 = (totalCost * (percentage1 / 100)).toFixed(2);
-            const allocation2 = (totalCost * (percentage2 / 100)).toFixed(2);
-
-            document.getElementById('allocation1').innerText = allocation1;
-            document.getElementById('allocation2').innerText = allocation2;
-        }
-
-        function calculateWaterCost() {
-            const gasConsumption = parseFloat(document.getElementById('gasConsumption').value) || 0;
-            const waterPercentage = parseFloat(document.getElementById('waterPercentage').value) || 0;
-            const unitCost = parseFloat(document.getElementById('unitCost').value) || 0;
-
-            const waterCost = (gasConsumption * (waterPercentage / 100) * unitCost).toFixed(2);
-            document.getElementById('waterCost').innerText = waterCost;
+            document.getElementById('housingUnit1Cost').innerText = `Costo per Unità Abitativa 1: €${(heatingCost1 + acsCost1).toFixed(2)}`;
+            document.getElementById('housingUnit2Cost').innerText = `Costo per Unità Abitativa 2: €${(heatingCost2 + acsCost2).toFixed(2)}`;
         }
     </script>
 </body>
