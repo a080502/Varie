@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ripartizione Spese Riscaldamento e ACS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .section h2 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .result-box {
+            background: #fff9c4;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .result-box h3 {
+            margin-top: 0;
+            color: #f57c00;
+        }
+        .summary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 25px;
+            margin-top: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .summary h2 {
+            margin-top: 0;
+            color: white;
+            text-align: center;
+        }
+        .apartment {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        .apartment h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        .detail-line {
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+        .total-line {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(255,255,255,0.5);
+        }
+        .verification {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .icon {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+        .history-section {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .history-section h2 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .history-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .history-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+        .history-table tr:hover {
+            background: #f5f5f5;
+        }
+        .clear-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        .clear-history-btn:hover {
+            background: #c82333;
+        }
+        .export-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background 0.3s;
+            display: block;
+            width: 100%;
+            font-weight: 600;
+        }
+        .export-btn:hover {
+            background: #218838;
+        }
+        .export-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .export-pdf-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background 0.3s;
+            display: block;
+            width: 100%;
+            font-weight: 600;
+        }
+        .export-pdf-btn:hover {
+            background: #c0392b;
+        }
+        .export-pdf-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Ripartizione Spese Riscaldamento e ACS</h1>
+        <p class="subtitle">Calcolo automatico delle spese per riscaldamento e acqua calda sanitaria</p>
+
+        <div class="section">
+            <h2>📋 Dati Bolletta</h2>
+            
+            <label for="totalBill">💰 Importo Totale Bolletta (€)</label>
+            <input type="number" id="totalBill" step="0.01" placeholder="es. 1000.00">
+            
+            <label for="m3ACS">🚿 Metri Cubi ACS Consumati (m³)</label>
+            <input type="number" id="m3ACS" step="0.01" placeholder="es. 1.0">
+        </div>
+
+        <div class="section">
+            <h2>⚙️ Parametri Caldaia</h2>
+            
+            <label for="gasPerM3">⛽ Gas Necessario per 1 m³ di ACS (m³)</label>
+            <input type="number" id="gasPerM3" step="0.1" value="3.6">
+            
+            <label for="boilerEfficiency">📊 Rendimento Caldaia (%)</label>
+            <input type="number" id="boilerEfficiency" step="1" value="96">
+            
+            <label for="gasCost">💵 Costo Gas (€/m³)</label>
+            <input type="number" id="gasCost" step="0.01" value="1.00">
+        </div>
+
+        <div class="section">
+            <h2>📊 Percentuali di Ripartizione</h2>
+            
+            <label for="heatingPercent1">🔥 Appartamento 1 - Riscaldamento (%)</label>
+            <input type="number" id="heatingPercent1" step="0.01" placeholder="es. 10">
+            
+            <label for="heatingPercent2">🔥 Appartamento 2 - Riscaldamento (%)</label>
+            <input type="number" id="heatingPercent2" step="0.01" placeholder="es. 90">
+            
+            <label for="acsPercent1">💧 Appartamento 1 - ACS (%) - inserire 0 per non addebitare</label>
+            <input type="number" id="acsPercent1" step="0.01" placeholder="es. 20 (0 per non addebitare)">
+            
+            <label for="acsPercent2">💧 Appartamento 2 - ACS (%) - inserire 0 per non addebitare</label>
+            <input type="number" id="acsPercent2" step="0.01" placeholder="es. 80 (0 per non addebitare)">
+            
+            <button class="export-btn" onclick="calculate()" style="margin-top: 25px; background: #667eea;">
+                🔄 CALCOLA RIPARTIZIONE
+            </button>
+        </div>
+
+        <div class="result-box">
+            <h3>🔍 Dettaglio Calcoli</h3>
+            <div class="info-box">
+                <strong>Costo per 1 m³ di ACS:</strong> <span id="costPerM3ACS">0.00</span> €
+            </div>
+            <div class="info-box">
+                <strong>Costo Totale ACS:</strong> <span id="totalACSCost">0.00</span> €
+            </div>
+            <div class="info-box">
+                <strong>Costo Riscaldamento:</strong> <span id="heatingCost">0.00</span> € (Bolletta - ACS)
+            </div>
+        </div>
+
+        <div class="summary">
+            <h2>📊 RIEPILOGO SPESE</h2>
+            
+            <div class="apartment">
+                <h3>🏠 APPARTAMENTO 1</h3>
+                <div class="detail-line">
+                    <span class="icon">🔥</span> Riscaldamento: <strong><span id="heatingCost1">0.00</span> €</strong>
+                </div>
+                <div class="detail-line">
+                    <span class="icon">💧</span> ACS: <strong><span id="acsCost1">0.00</span> €</strong>
+                </div>
+                <div class="total-line">
+                    <span class="icon">💰</span> TOTALE DA PAGARE: <span id="totalToPay1">0.00</span> €
+                </div>
+            </div>
+            
+            <div class="apartment">
+                <h3>🏠 APPARTAMENTO 2</h3>
+                <div class="detail-line">
+                    <span class="icon">🔥</span> Riscaldamento: <strong><span id="heatingCost2">0.00</span> €</strong>
+                </div>
+                <div class="detail-line">
+                    <span class="icon">💧</span> ACS: <strong><span id="acsCost2">0.00</span> €</strong>
+                </div>
+                <div class="total-line">
+                    <span class="icon">💰</span> TOTALE DA PAGARE: <span id="totalToPay2">0.00</span> €
+                </div>
+            </div>
+            
+            <div class="verification">
+                <span class="icon">✅</span> <span id="verification">Verifica: 0.00 €</span>
+            </div>
+            
+            <button class="export-btn" id="exportBtn" onclick="exportToExcel()" disabled>
+                📊 Esporta Calcolo in Excel
+            </button>
+            
+            <button class="export-pdf-btn" id="exportPdfBtn" onclick="exportToPDF()" disabled>
+                📄 Esporta Calcolo in PDF
+            </button>
+        </div>
+
+        <div class="history-section">
+            <h2>📜 Storico Ultimi 3 Calcoli</h2>
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Bolletta (€)</th>
+                        <th>ACS (m³)</th>
+                        <th>App.1 (€)</th>
+                        <th>App.2 (€)</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #999;">Nessun calcolo salvato</td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="clear-history-btn" onclick="clearHistory()">🗑️ Cancella Storico</button>
+        </div>
+       		<p style="text-align: center; margin-top: 20px; color: #666;">!! ATTENZIONE !! I dati sono puramente indicativi non hanno nessun valore legale</p>
+			<p style="text-align: center; margin-top: 20px; color: #666;">Created by: Denis D.</p>
+		</div>
+
+    <script>
+        // Variabile globale per memorizzare l'ultimo calcolo
+        let lastCalculation = null;
+
+        // Funzione per esportare in PDF
+        function exportToPDF() {
+            if (!lastCalculation) {
+                alert('Nessun calcolo disponibile da esportare');
+                return;
+            }
+
+            const calc = lastCalculation;
+            const date = new Date().toLocaleString('it-IT', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Titolo
+            doc.setFontSize(18);
+            doc.setTextColor(102, 126, 234);
+            doc.text('RIPARTIZIONE SPESE RISCALDAMENTO E ACS', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Data calcolo: ${date}`, 105, 28, { align: 'center' });
+
+            let y = 45;
+
+            // Dati Bolletta
+            doc.setFontSize(14);
+            doc.setTextColor(102, 126, 234);
+            doc.text('DATI BOLLETTA', 20, y);
+            y += 8;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Importo Totale Bolletta: ${calc.totalBill.toFixed(2)} €`, 20, y);
+            y += 6;
+            doc.text(`Metri Cubi ACS Consumati: ${calc.m3ACS.toFixed(2)} m³`, 20, y);
+            y += 12;
+
+            // Parametri Caldaia
+            doc.setFontSize(14);
+            doc.setTextColor(102, 126, 234);
+            doc.text('PARAMETRI CALDAIA', 20, y);
+            y += 8;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Gas per 1 m³ di ACS: ${calc.gasPerM3.toFixed(1)} m³`, 20, y);
+            y += 6;
+            doc.text(`Rendimento Caldaia: ${calc.boilerEfficiency.toFixed(0)}%`, 20, y);
+            y += 6;
+            doc.text(`Costo Gas: ${calc.gasCost.toFixed(2)} €/m³`, 20, y);
+            y += 12;
+
+            // Percentuali di Ripartizione
+            doc.setFontSize(14);
+            doc.setTextColor(102, 126, 234);
+            doc.text('PERCENTUALI DI RIPARTIZIONE', 20, y);
+            y += 8;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Appartamento 1 - Riscaldamento: ${calc.heatingPercent1.toFixed(2)}%`, 20, y);
+            y += 6;
+            doc.text(`Appartamento 2 - Riscaldamento: ${calc.heatingPercent2.toFixed(2)}%`, 20, y);
+            y += 6;
+            doc.text(`Appartamento 1 - ACS: ${calc.acsPercent1.toFixed(2)}%`, 20, y);
+            y += 6;
+            doc.text(`Appartamento 2 - ACS: ${calc.acsPercent2.toFixed(2)}%`, 20, y);
+            y += 12;
+
+            // Dettaglio Calcoli
+            doc.setFontSize(14);
+            doc.setTextColor(102, 126, 234);
+            doc.text('DETTAGLIO CALCOLI', 20, y);
+            y += 8;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Costo per 1 m³ di ACS: ${calc.costPerM3ACS.toFixed(2)} €`, 20, y);
+            y += 6;
+            doc.text(`Costo Totale ACS: ${calc.totalACSCost.toFixed(2)} €`, 20, y);
+            y += 6;
+            doc.text(`Costo Riscaldamento: ${calc.heatingCost.toFixed(2)} €`, 20, y);
+            y += 12;
+
+            // Riepilogo Spese
+            doc.setFontSize(16);
+            doc.setTextColor(17, 153, 142);
+            doc.text('RIEPILOGO SPESE', 105, y, { align: 'center' });
+            y += 10;
+
+            // Appartamento 1
+            doc.setFontSize(13);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'bold');
+            doc.text('APPARTAMENTO 1', 20, y);
+            doc.setFont(undefined, 'normal');
+            y += 7;
+            
+            doc.setFontSize(11);
+            doc.text(`Riscaldamento: ${calc.heatingCost1.toFixed(2)} €`, 25, y);
+            y += 6;
+            doc.text(`ACS: ${calc.acsCost1.toFixed(2)} €`, 25, y);
+            y += 6;
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTALE DA PAGARE: ${calc.totalToPay1.toFixed(2)} €`, 25, y);
+            doc.setFont(undefined, 'normal');
+            y += 10;
+
+            // Appartamento 2
+            doc.setFontSize(13);
+            doc.setFont(undefined, 'bold');
+            doc.text('APPARTAMENTO 2', 20, y);
+            doc.setFont(undefined, 'normal');
+            y += 7;
+            
+            doc.setFontSize(11);
+            doc.text(`Riscaldamento: ${calc.heatingCost2.toFixed(2)} €`, 25, y);
+            y += 6;
+            doc.text(`ACS: ${calc.acsCost2.toFixed(2)} €`, 25, y);
+            y += 6;
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTALE DA PAGARE: ${calc.totalToPay2.toFixed(2)} €`, 25, y);
+            doc.setFont(undefined, 'normal');
+            y += 12;
+
+            // Verifica
+            doc.setFontSize(12);
+            doc.setTextColor(102, 126, 234);
+            const total = calc.totalToPay1 + calc.totalToPay2;
+            doc.text(`VERIFICA: App.1 (${calc.totalToPay1.toFixed(2)} €) + App.2 (${calc.totalToPay2.toFixed(2)} €) = ${total.toFixed(2)} €`, 105, y, { align: 'center' });
+
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Created by: Denis D. -  !! ATTENZIONE !! I dati sono puramente indicativi non hanno nessun valore legale', 105, 285, { align: 'center' });
+
+            // Salva il PDF
+            const filename = `Ripartizione_Spese_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.pdf`;
+            doc.save(filename);
+        }
+
+        // Funzione per esportare in Excel
+        function exportToExcel() {
+            if (!lastCalculation) {
+                alert('Nessun calcolo disponibile da esportare');
+                return;
+            }
+
+            const calc = lastCalculation;
+            const date = new Date().toLocaleString('it-IT', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // Crea il contenuto CSV
+            let csvContent = "RIPARTIZIONE SPESE RISCALDAMENTO E ACS\n";
+            csvContent += `Data calcolo:,${date}\n\n`;
+            
+            csvContent += "DATI BOLLETTA\n";
+            csvContent += `Importo Totale Bolletta (€):,${calc.totalBill.toFixed(2)}\n`;
+            csvContent += `Metri Cubi ACS Consumati (m³):,${calc.m3ACS.toFixed(2)}\n\n`;
+            
+            csvContent += "PARAMETRI CALDAIA\n";
+            csvContent += `Gas per 1 m³ di ACS (m³):,${calc.gasPerM3.toFixed(1)}\n`;
+            csvContent += `Rendimento Caldaia (%):,${calc.boilerEfficiency.toFixed(0)}\n`;
+            csvContent += `Costo Gas (€/m³):,${calc.gasCost.toFixed(2)}\n\n`;
+            
+            csvContent += "PERCENTUALI DI RIPARTIZIONE\n";
+            csvContent += `Appartamento 1 - Riscaldamento (%):,${calc.heatingPercent1.toFixed(2)}\n`;
+            csvContent += `Appartamento 2 - Riscaldamento (%):,${calc.heatingPercent2.toFixed(2)}\n`;
+            csvContent += `Appartamento 1 - ACS (%):,${calc.acsPercent1.toFixed(2)}\n`;
+            csvContent += `Appartamento 2 - ACS (%):,${calc.acsPercent2.toFixed(2)}\n\n`;
+            
+            csvContent += "DETTAGLIO CALCOLI\n";
+            csvContent += `Costo per 1 m³ di ACS (€):,${calc.costPerM3ACS.toFixed(2)}\n`;
+            csvContent += `Costo Totale ACS (€):,${calc.totalACSCost.toFixed(2)}\n`;
+            csvContent += `Costo Riscaldamento (€):,${calc.heatingCost.toFixed(2)}\n\n`;
+            
+            csvContent += "RIEPILOGO SPESE\n";
+            csvContent += "Descrizione,Appartamento 1 (€),Appartamento 2 (€)\n";
+            csvContent += `Riscaldamento,${calc.heatingCost1.toFixed(2)},${calc.heatingCost2.toFixed(2)}\n`;
+            csvContent += `ACS,${calc.acsCost1.toFixed(2)},${calc.acsCost2.toFixed(2)}\n`;
+            csvContent += `TOTALE DA PAGARE,${calc.totalToPay1.toFixed(2)},${calc.totalToPay2.toFixed(2)}\n\n`;
+            
+            csvContent += "VERIFICA\n";
+            csvContent += `Somma Appartamenti (€):,${(calc.totalToPay1 + calc.totalToPay2).toFixed(2)}\n`;
+            csvContent += `Bolletta Totale (€):,${calc.totalBill.toFixed(2)}\n`;
+            csvContent += `Differenza (€):,${((calc.totalToPay1 + calc.totalToPay2) - calc.totalBill).toFixed(2)}\n`;
+
+            // Crea il file e scaricalo
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            const filename = `Ripartizione_Spese_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.csv`;
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Carica lo storico all'avvio
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('heatingHistory') || '[]');
+            updateHistoryTable(history);
+        }
+
+        // Aggiorna la tabella dello storico
+        function updateHistoryTable(history) {
+            const tbody = document.getElementById('historyBody');
+            
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Nessun calcolo salvato</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = history.map(item => `
+                <tr>
+                    <td>${item.date}</td>
+                    <td>${item.totalBill.toFixed(2)}</td>
+                    <td>${item.m3ACS.toFixed(2)}</td>
+                    <td>${item.totalToPay1.toFixed(2)}</td>
+                    <td>${item.totalToPay2.toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Salva il calcolo nello storico
+        function saveToHistory(data) {
+            let history = JSON.parse(localStorage.getItem('heatingHistory') || '[]');
+            
+            // Aggiungi il nuovo calcolo all'inizio
+            history.unshift({
+                date: new Date().toLocaleString('it-IT', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                ...data
+            });
+            
+            // Mantieni solo gli ultimi 3 calcoli
+            history = history.slice(0, 3);
+            
+            localStorage.setItem('heatingHistory', JSON.stringify(history));
+            updateHistoryTable(history);
+        }
+
+        // Cancella lo storico
+        function clearHistory() {
+            if (confirm('Sei sicuro di voler cancellare lo storico?')) {
+                localStorage.removeItem('heatingHistory');
+                loadHistory();
+            }
+        }
+
+        function calculate() {
+            // Leggi i valori
+            const totalBill = parseFloat(document.getElementById('totalBill').value) || 0;
+            const m3ACS = parseFloat(document.getElementById('m3ACS').value) || 0;
+            const gasPerM3 = parseFloat(document.getElementById('gasPerM3').value) || 3.6;
+            const boilerEfficiency = parseFloat(document.getElementById('boilerEfficiency').value) || 96;
+            const gasCost = parseFloat(document.getElementById('gasCost').value) || 1.00;
+            const heatingPercent1 = parseFloat(document.getElementById('heatingPercent1').value) || 0;
+            const heatingPercent2 = parseFloat(document.getElementById('heatingPercent2').value) || 0;
+            const acsPercent1 = parseFloat(document.getElementById('acsPercent1').value) || 0;
+            const acsPercent2 = parseFloat(document.getElementById('acsPercent2').value) || 0;
+
+            // Calcolo CORRETTO del costo per m³ di ACS
+            const costPerM3ACS = gasPerM3 * (96 / boilerEfficiency) * gasCost;
+            
+            // Calcolo costo totale ACS
+            const totalACSCost = m3ACS * costPerM3ACS;
+            
+            // Calcolo costo riscaldamento (bolletta - ACS)
+            const heatingCost = totalBill - totalACSCost;
+
+            // Ripartizione riscaldamento
+            const heatingCost1 = heatingCost * (heatingPercent1 / 100);
+            const heatingCost2 = heatingCost * (heatingPercent2 / 100);
+
+            // Ripartizione ACS (se percentuale = 0, costo = 0)
+            const acsCost1 = acsPercent1 === 0 ? 0 : totalACSCost * (acsPercent1 / 100);
+            const acsCost2 = acsPercent2 === 0 ? 0 : totalACSCost * (acsPercent2 / 100);
+
+            // Totali
+            const totalToPay1 = heatingCost1 + acsCost1;
+            const totalToPay2 = heatingCost2 + acsCost2;
+
+            // Aggiorna UI - Dettagli
+            document.getElementById('costPerM3ACS').innerText = costPerM3ACS.toFixed(2);
+            document.getElementById('totalACSCost').innerText = totalACSCost.toFixed(2);
+            document.getElementById('heatingCost').innerText = heatingCost.toFixed(2);
+
+            // Aggiorna UI - Appartamento 1
+            document.getElementById('heatingCost1').innerText = heatingCost1.toFixed(2);
+            document.getElementById('acsCost1').innerText = acsCost1.toFixed(2);
+            document.getElementById('totalToPay1').innerText = totalToPay1.toFixed(2);
+
+            // Aggiorna UI - Appartamento 2
+            document.getElementById('heatingCost2').innerText = heatingCost2.toFixed(2);
+            document.getElementById('acsCost2').innerText = acsCost2.toFixed(2);
+            document.getElementById('totalToPay2').innerText = totalToPay2.toFixed(2);
+
+            // Verifica
+            const total = totalToPay1 + totalToPay2;
+            document.getElementById('verification').innerText = 
+                `Verifica: App.1 (${totalToPay1.toFixed(2)} €) + App.2 (${totalToPay2.toFixed(2)} €) = ${total.toFixed(2)} € (Bolletta: ${totalBill.toFixed(2)} €)`;
+            
+            // Salva nello storico solo se i dati principali sono presenti
+            if (totalBill > 0 && (heatingPercent1 > 0 || heatingPercent2 > 0)) {
+                saveToHistory({
+                    totalBill,
+                    m3ACS,
+                    totalToPay1,
+                    totalToPay2
+                });
+                
+                // Salva l'ultimo calcolo completo per l'export
+                lastCalculation = {
+                    totalBill,
+                    m3ACS,
+                    gasPerM3,
+                    boilerEfficiency,
+                    gasCost,
+                    heatingPercent1,
+                    heatingPercent2,
+                    acsPercent1,
+                    acsPercent2,
+                    costPerM3ACS,
+                    totalACSCost,
+                    heatingCost,
+                    heatingCost1,
+                    heatingCost2,
+                    acsCost1,
+                    acsCost2,
+                    totalToPay1,
+                    totalToPay2
+                };
+                
+                // Abilita il pulsante export
+                document.getElementById('exportBtn').disabled = false;
+                document.getElementById('exportPdfBtn').disabled = false;
+            } else {
+                // Disabilita il pulsante export se i dati non sono validi
+                document.getElementById('exportBtn').disabled = true;
+                document.getElementById('exportPdfBtn').disabled = true;
+            }
+        }
+
+        // Calcola al caricamento
+        window.onload = function() {
+            loadHistory();
+            // Non calcolare automaticamente al caricamento
+        };
+    </script>
+</body>
+</html>
